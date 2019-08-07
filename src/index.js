@@ -17,12 +17,6 @@ app.post('/users', async (req, res) => {
   } catch (e) {
     res.status(400).send(e);
   }
-  // user
-  //   .save()
-  //   .then(user => res.send(user).status(201))
-  //   .catch(error => {
-  //     res.status(400).send(error);
-  //   });
 });
 
 app.get('/users', async (req, res) => {
@@ -32,9 +26,6 @@ app.get('/users', async (req, res) => {
   } catch (error) {
     res.send(error).status(500);
   }
-  // User.find({})
-  //   .then(users => res.send(users).status(200))
-  //   .catch(error => res.send(error).status(500));
 });
 
 app.get('/users/:id', async (req, res) => {
@@ -49,31 +40,11 @@ app.get('/users/:id', async (req, res) => {
   } catch (e) {
     res.status(500).send(e);
   }
-
-  // User.findById(id)
-  //   .then(user => {
-  //     if (!user) {
-  //       return res.status(404).send();
-  //     }
-  //     res.send(user);
-  //   })
-  //   .catch(() => res.status(500).send());
 });
 
 app.patch('/users/:id', async (req, res) => {
   const id = req.params.id;
   const keysToUpdate = ['name', 'email', 'password'];
-  // const keysFromReq = Object.keys(req.body);
-  // var invalidKey = null;
-  // const isValidKey = keysFromReq.every(key => {
-  //   invalidKey = key;
-  //   return keysToUpdate.includes(key);
-  // });
-  // if (!isValidKey) {
-  //   return res
-  //     .status(400)
-  //     .send({ error: `${invalidKey} is not valid filed for update` });
-  // }
   validateKeys(keysToUpdate, req.body, res);
   try {
     const updatedUser = await User.findByIdAndUpdate(id, req.body, {
@@ -91,6 +62,11 @@ app.patch('/users/:id', async (req, res) => {
   }
 });
 
+app.delete('/users/:id', (req, res) => {
+  const id = req.params.id;
+  deleteFromDocuments(User, id, res);
+});
+
 // TASKS
 app.post('/tasks', async (req, res) => {
   const task = new Task(req.body);
@@ -100,10 +76,6 @@ app.post('/tasks', async (req, res) => {
   } catch (error) {
     res.send(error).status(400);
   }
-  // task
-  //   .save()
-  //   .then(task => res.send(task).status(201))
-  //   .catch(error => res.send(error).status(400));
 });
 
 app.get('/tasks', async (req, res) => {
@@ -113,11 +85,6 @@ app.get('/tasks', async (req, res) => {
   } catch (error) {
     res.status(500).send(error);
   }
-  // Task.find({})
-  //   .then(tasks => res.status(200).send(tasks))
-  //   .catch(error => {
-  //     res.status(500).send();
-  //   });
 });
 
 app.get('/tasks/:id', async (req, res) => {
@@ -132,31 +99,11 @@ app.get('/tasks/:id', async (req, res) => {
   } catch (error) {
     res.status(500).send();
   }
-  // Task.findById(id)
-  //   .then(task => {
-  //     if (task) {
-  //       res.status(200).send(task);
-  //     } else {
-  //       res.status(404).send();
-  //     }
-  //   })
-  //   .catch(error => res.status(500).send(error));
 });
 
 app.patch('/tasks/:id', async (req, res) => {
   const id = req.params.id;
   const keysToUpdate = ['description', 'completed'];
-  // const keysFromReq = Object.keys(req.body);
-  // var invalidKey = null;
-  // const isValidKey = keysFromReq.every(key => {
-  //   invalidKey = key;
-  //   return keysToUpdate.includes(key);
-  // });
-  // if (!isValidKey) {
-  //   return res
-  //     .status(400)
-  //     .send({ error: `${invalidKey} is not valid filed for update` });
-  // }
   validateKeys(keysToUpdate, req.body, res);
 
   try {
@@ -174,9 +121,13 @@ app.patch('/tasks/:id', async (req, res) => {
   }
 });
 
+app.delete('/tasks/:id', (req, res) => {
+  const id = req.params.id;
+  deleteFromDocuments(Task, id, res);
+});
+
 // HELPERS
 validateKeys = (keysToUpdate, reqBody, res) => {
-  // const keysToUpdate = ['description', 'completed'];
   const keysFromReq = Object.keys(reqBody);
   var invalidKey = null;
   const isValidKey = keysFromReq.every(key => {
@@ -187,6 +138,19 @@ validateKeys = (keysToUpdate, reqBody, res) => {
     return res
       .status(400)
       .send({ error: `${invalidKey} is not valid filed for update` });
+  }
+};
+
+deleteFromDocuments = async (Model, id, res) => {
+  try {
+    const deletedItem = await Model.findByIdAndDelete(id);
+    if (deletedItem) {
+      res.status(200).send(deletedItem);
+    } else {
+      res.status(404).send();
+    }
+  } catch (error) {
+    res.status(500).send();
   }
 };
 
