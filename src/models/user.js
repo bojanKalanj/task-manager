@@ -70,6 +70,13 @@ userSchema.methods.toJSON = function() {
   return userObject;
 };
 
+// CONNECTION TO TASK MODEL
+userSchema.virtual('tasks', {
+  ref: 'Task',
+  localField: '_id',
+  foreignField: 'owner'
+});
+
 // CLASS METHODS
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
